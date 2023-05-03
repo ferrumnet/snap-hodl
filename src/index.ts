@@ -1,10 +1,13 @@
-// ./index.ts
+// src/index.ts
+
+import dotenv from "dotenv";
+dotenv.config();
 
 import Web3 from "web3";
 import { AbiItem, AbiInput } from "web3-utils";
 import stakingContractAbi from "../ABI/stakingContractAbi.json";
 
-const rpcUrl = "https://nd-499-825-018.p2pify.com/5d8bab30e1462f48144c36f18d2ee958";
+const rpcUrl = process.env.RPC_URL || "";
 const web3 = new Web3(rpcUrl);
 
 console.log("Web3 instance created.");
