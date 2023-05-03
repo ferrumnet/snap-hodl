@@ -1,4 +1,4 @@
-// ./index.ts
+// src/index.ts
 
 import Web3 from "web3";
 import { AbiItem, AbiInput } from "web3-utils";
