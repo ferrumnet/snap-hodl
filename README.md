@@ -29,7 +29,7 @@ Clone the repository:
 
 ```sh
 
-git clone https://github.com/yourusername/snapshot-tooling.git
+git clone git@github.com:ferrumnet/snapshot.git
 ```
 
 Change to the project directory:
