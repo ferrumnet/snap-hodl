@@ -1,148 +1,137 @@
 // src/index.ts
 
 import dotenv from "dotenv";
-import Web3 from "web3";
-import { AbiItem, AbiInput } from "web3-utils";
-import { BigNumber } from "bignumber.js";
-import stakingContractAbi from "../ABI/standardStakingContractAbi.json";
-import tokenContractAbi from "../ABI/tokenContractAbi.json";
+import web3 from "web3";
+import { getUniqueStakers, getStakedBalances } from "./standardStaking";
+import { getUniqueStakersFromOpenStaking, getOpenStakingStakedBalances } from "./openStaking";
+import { StakingContractDataItem } from "./types";
+import { getRpcUrl } from "./utils/getRpcUrl";
+import { getTokenDecimals } from "./utils/getTokenDecimals";
+import { updateTotalStakedBalances } from "./utils/updateTotalStakedBalances";
 
 dotenv.config();
+const APP_NAME = process.env.APP_NAME;
+const DB_CONNECTION_STRING = process.env.DB_CONNECTION_STRING ?? "";
+const DB_NAME = process.env.DB_NAME ?? "";
+const DB_COLLECTION = process.env.DB_COLLECTION ?? "";
 
-const rpcUrl = process.env.RPC_URL || "";
-const web3 = new Web3(rpcUrl);
-
-console.log("Web3 instance created.");
-
-const tokenContractAddress = "0x9f6abbf0ba6b5bfa27f4deb6597cc6ec20573fda";
-const tokenContract = new web3.eth.Contract(
-  tokenContractAbi as unknown as AbiItem[],
-  tokenContractAddress
-);
-
-console.log("Token contract instance created.");
-
-async function getTokenDecimals(tokenContractAddress: string): Promise<number> {
-  console.log("Fetching token decimals...");
-
-  let decimals = 18;
-
-  try {
-    const tokenContract = new web3.eth.Contract(tokenContractAbi as unknown as AbiItem[], tokenContractAddress);
-    decimals = parseInt(await tokenContract.methods.decimals().call());
-  } catch (error) {
-    console.error("Error fetching token decimals:", error);
-  }
-
-  console.log("Token decimals fetched.");
-  return decimals;
+if (!DB_CONNECTION_STRING || !DB_NAME || !DB_COLLECTION) {
+  throw new Error("DB_CONNECTION_STRING, DB_NAME, or DB_COLLECTION is not defined.");
 }
 
-
-const stakingContractAddress = "0x2bE7904c81dd3535f31B2C7B524a6ed91FDb37EC";
-const stakingContract = new web3.eth.Contract(
-  stakingContractAbi as unknown as AbiItem[],
-  stakingContractAddress
-);
-
-console.log("Staking contract instance created.");
-
-async function getUniqueStakers(): Promise<string[]> {
-  console.log("Fetching unique stakers...");
-
-  const uniqueStakers = new Set<string>();
-
-  const stakedEventFilter = {
-    fromBlock: 70124014,
-    toBlock: "latest",
-    address: stakingContractAddress,
-    topics: [stakingContract.events.Staked.signature],
-  };
-
-  try {
-    const logs = await web3.eth.getPastLogs(stakedEventFilter);
-
-    logs.forEach((log) => {
-        const eventInterface = stakingContract.options.jsonInterface.find(
-          (i: any) => i.signature === log.topics[0]
-        );
-      
-        if (!eventInterface) {
-          console.error("Event interface not found for signature:", log.topics[0]);
-          return;
-        }
-      
-        const inputs = eventInterface.inputs as AbiInput[];
-      
-        const event = web3.eth.abi.decodeLog(
-          inputs,
-          log.data,
-          log.topics.slice(1)
-        );
-        const stakerAddress = event["staker_"];
-        uniqueStakers.add(stakerAddress);
-      });
-      
-    console.log("Unique stakers fetched.");
-  } catch (error) {
-    console.error("Error fetching unique stakers:", error);
+const getWeb3Instance = (rpcUrl: string | undefined): web3 => {
+  if (!rpcUrl) {
+    throw new Error("RPC URL is undefined.");
   }
+  return new web3(rpcUrl);
+};
 
-  return Array.from(uniqueStakers);
-}
+// The data array containing staking contract and token contract addresses
+const data: StakingContractDataItem[] = [
+  {
+    stakingPoolName: "GC - VIP Pool - FRM Arbitrum",
+    stakingContractAddress: "0x2bE7904c81dd3535f31B2C7B524a6ed91FDb37EC",
+    stakingPoolType: "standard",
+    tokenContractAddress: "0x9f6abbf0ba6b5bfa27f4deb6597cc6ec20573fda",
+    chainId: "42161",
+    fromBlock: 66553295,
+    toBlock: "latest"
+  },
+  {
+    stakingPoolName: "cFRM Arbitrum Open Staking",
+    stakingContractAddress: "0xb4927895cbee88e651e0582893051b3b0f8d7db8",
+    stakingPoolType: "open",
+    tokenContractAddress: "0xe685d3cc0be48bd59082ede30c3b64cbfc0326e2",
+    chainId: "42161",
+    fromBlock: 66553295,
+    toBlock: "latest"
+  },
+  {
+    stakingPoolName: "cFRM BSC Open Staking",
+    stakingContractAddress: "0x35e15ff9ebb37d8c7a413fd85bad515396dc8008",
+    stakingPoolType: "open",
+    tokenContractAddress: "0xaf329a957653675613d0d98f49fc93326aeb36fc",
+    chainId: "56",
+    fromBlock: 17533067,
+    toBlock: 18033067
+  }
+];
 
-async function getStakedBalances(stakers: string[], decimals: number): Promise<Map<string, string>> {
-  console.log("Fetching staked balances...");
 
-  const stakedBalances = new Map<string, string>();
+(async () => {
+  let totalStakedBalances: { [address: string]: string } = {};
+  let finalResults: any[] = [];
 
-  for (const staker of stakers) {
+  for (const item of data) {
+    const stakingPoolName = item.stakingPoolName;
+    const stakingContractAddress = item.stakingContractAddress;
+    const tokenContractAddress = item.tokenContractAddress;
+    const chainId = item.chainId;
+    const fromBlock = item.fromBlock;
+    const toBlock = item.toBlock;
+    const rpcUrl = await getRpcUrl(chainId, APP_NAME, DB_CONNECTION_STRING, DB_NAME, DB_COLLECTION);
+
     try {
-      const balance = await stakingContract.methods.stakeOf(staker).call();
-      const convertedBalance = new BigNumber(balance).dividedBy(new BigNumber(10).pow(decimals)).toString();
-      stakedBalances.set(staker, convertedBalance);
+      const web3Instance = getWeb3Instance(rpcUrl);
+      const decimals = await getTokenDecimals(tokenContractAddress, web3Instance);
+      console.log("Token decimals:", decimals);
+
+      if (item.stakingPoolType === "standard") {
+        const stakers = await getUniqueStakers(stakingContractAddress, web3Instance, fromBlock, toBlock);
+        console.log("Unique staker addresses:", stakers);
+
+        const stakedBalances = await getStakedBalances(
+          stakers,
+          decimals,
+          stakingContractAddress,
+          web3Instance
+        );
+        console.log("Staked balances:", stakedBalances);
+
+        const result = {
+          stakingPoolName: stakingPoolName,
+          stakedBalances: stakedBalances,
+        };
+
+        console.log("Result:", JSON.stringify(result, null, 2));
+
+        // Update the totalStakedBalances object
+        updateTotalStakedBalances(stakedBalances, totalStakedBalances);
+
+        // Add the result to the finalResults array
+        finalResults.push(result);
+      } else if (item.stakingPoolType === "open") {
+        const uniqueStakers = await getUniqueStakersFromOpenStaking(web3Instance, stakingContractAddress, tokenContractAddress, fromBlock, toBlock);
+        console.log("Unique staker addresses from open staking:", uniqueStakers);
+
+        const stakedBalances = await getOpenStakingStakedBalances(web3Instance, stakingContractAddress, tokenContractAddress, uniqueStakers, decimals);
+        console.log("Staked balances from open staking:", stakedBalances);
+
+        const result = {
+          stakingPoolName: stakingPoolName,
+          stakedBalances: stakedBalances,
+        };
+
+        console.log("Result:", JSON.stringify(result, null, 2));
+
+        // Update the totalStakedBalances object
+        updateTotalStakedBalances(stakedBalances, totalStakedBalances);
+
+        // Add the result to the finalResults array
+        finalResults.push(result);
+      }
+
+
+      // Add logic for other staking pool types here if needed
+
     } catch (error) {
-      console.error(`Error fetching staked balance for ${staker}:`, error);
+      console.error("Error processing data item:", error);
+      continue;
     }
   }
 
-  console.log("Staked balances fetched.");
-  return stakedBalances;
-}
+  // Add the total staked balances to the finalResults array
+  finalResults.push({ stakingPoolName: "totalStakedBalances", stakedBalances: totalStakedBalances });
 
-
-async function getStakingPoolName(): Promise<string> {
-  console.log("Fetching staking pool name...");
-
-  let poolName = "";
-
-  try {
-    poolName = await stakingContract.methods.name().call();
-  } catch (error) {
-    console.error("Error fetching staking pool name:", error);
-  }
-
-  console.log("Staking pool name fetched.");
-  return poolName;
-}
-
-(async () => {
-  const decimals = await getTokenDecimals(tokenContractAddress);
-  console.log("Token decimals:", decimals);
-
-  const stakers = await getUniqueStakers();
-  console.log("Unique staker addresses:", stakers);
-
-  const stakedBalances = await getStakedBalances(stakers, decimals);
-  console.log("Staked balances:", stakedBalances);
-
-  const stakingPoolName = await getStakingPoolName();
-  console.log("Staking pool name:", stakingPoolName);
-
-  const result = {
-    stakingPoolName: stakingPoolName,
-    stakedBalances: Object.fromEntries(stakedBalances),
-  };
-
-  console.log("Result:", JSON.stringify(result, null, 2));
+  console.log("Final Results:", JSON.stringify(finalResults, null, 2));
 })();
