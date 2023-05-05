@@ -1,62 +1,98 @@
 Snapshot by Ferrum Network
-=============
+==================================
 
-A simple tool to extract a snapshot of balances across staking contracts.
+Snapshot is a command-line utility designed to gather staking information from various staking contracts across multiple blockchain networks. This tool is capable of fetching unique staker addresses, calculating staked balances, and summing the staked balances from all staking contracts, regardless of the blockchain network they are deployed on.
 
-Getting Started
----------------
+Key Features
+------------
 
-These instructions will help you set up and run the project on your local machine.
+-   Fetches unique staker addresses and staked balances from different types of staking contracts.
+-   Supports standard staking contracts as well as open staking contracts.
+-   Handles staking contracts deployed across multiple blockchain networks.
+-   Aggregates the total staked balance from all staking contracts.
+-   Retrieves the appropriate RPC URL for each blockchain network by querying a MongoDB database.
+-   Modular code organization for easy maintenance and extensibility.
 
-### Prerequisites
+Prerequisites
+-------------
 
-You need to have the following installed on your machine:
+To run and build Snapshot, you need to have the following software installed on your system:
 
--   Node.js (v14 or later): <https://nodejs.org/en/download/>
--   npm (v6 or later): <https://www.npmjs.com/get-npm>
--   TypeScript (v4 or later): <https://www.typescriptlang.org/download>
+-   [Node.js](https://nodejs.org/en/download/) (version 14.x or higher)
+-   [npm](https://www.npmjs.com/get-npm) (usually bundled with Node.js)
+-   [MongoDB](https://www.mongodb.com/try/download/community) (version 4.4 or higher)
 
-### Installing Dependencies
+Installation
+------------
 
-After cloning the repository, navigate to the project directory and run the following command to install the necessary dependencies:
+Clone the repository:
 
+```sh
 
-```bash
+git clone https://github.com/yourusername/snapshot-tooling.git
+```
+
+Change to the project directory:
+
+```sh
+
+cd snapshot
+```
+
+Install the dependencies:
+
+```sh
+
 npm install
 ```
 
-This command will install all dependencies listed in the `package.json` file.
+Configuration
+-------------
 
-### Configuration
+Create a `.env` file in the root directory of the project and add the following environment variables:
 
-Before running the project, you need to set up the RPC URL for your Ethereum node. Open the `./index.ts` file and replace the following line with the correct RPC URL:
+```dotenv
 
-```javascript
-
-const rpcUrl = "https://nd-499-825-018.p2pify.com/5d8bab30e1462f48144c36f18d2ee958";
+DB_CONNECTION_STRING=mongodb://username:password@host:port
+DB_NAME=your_database_name
+DB_COLLECTION=your_collection_name
+APP_NAME=snapshot
 ```
 
-### Building the Project
+Replace the values with your actual MongoDB connection string, database name, and collection name. 
 
-To build the project, run the following command in the project directory:
+IMPORTANT: Leave APP_NAME value as `snapshot`.
 
-```bash
-tsc
+Running the Tool
+----------------
+
+To run Snapshot, use the following command:
+
+```sh
+
+npm start
 ```
 
-This will compile the TypeScript code into JavaScript in the `./dist` directory.
+The tool will then fetch the staking data from the specified contracts and display the results in the terminal.
 
-### Running the Project
+Building the Tool
+-----------------
 
-To run the project, execute the following command in the project directory:
+To build the tool, use the following command:
 
-```bash
-node dist/index.js
+```sh
+
+npm run build
 ```
 
-This command will run the compiled JavaScript code, and the output will display the unique staker addresses for the specified staking pool.
+This will compile the TypeScript files into JavaScript and output them in the `build` directory.
+
+Contributing
+------------
+
+We welcome contributions to the Snapshot project. If you find any issues or have suggestions for improvements, please open an issue or submit a pull request.
 
 License
 -------
 
-This project is licensed under the MIT License - see the [LICENSE.md](./LICENSE) file for details.
+Snapshot by Ferrum Network is released under the [MIT License](./LICENSE).
