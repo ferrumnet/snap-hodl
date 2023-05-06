@@ -8,5 +8,6 @@ export type StakingContractDataItem = {
     chainId: string;
     fromBlock: number | "latest";
     toBlock: number | "latest";
+    blockIterationSize: number
   };
   

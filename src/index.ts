@@ -2,6 +2,7 @@
 
 import dotenv from "dotenv";
 import web3 from "web3";
+import fs from "fs";
 import { getUniqueStakers, getStakedBalances } from "./standardStaking";
 import { getUniqueStakersFromOpenStaking, getOpenStakingStakedBalances } from "./openStaking";
 import { StakingContractDataItem } from "./types";
@@ -14,6 +15,7 @@ const APP_NAME = process.env.APP_NAME;
 const DB_CONNECTION_STRING = process.env.DB_CONNECTION_STRING ?? "";
 const DB_NAME = process.env.DB_NAME ?? "";
 const DB_COLLECTION = process.env.DB_COLLECTION ?? "";
+const DB_COLLECTION_STAKING_SNAPSHOT = process.env.DB_COLLECTION_STAKING_SNAPSHOT ?? "";
 
 if (!DB_CONNECTION_STRING || !DB_NAME || !DB_COLLECTION) {
   throw new Error("DB_CONNECTION_STRING, DB_NAME, or DB_COLLECTION is not defined.");
@@ -34,8 +36,9 @@ const data: StakingContractDataItem[] = [
     stakingPoolType: "standard",
     tokenContractAddress: "0x9f6abbf0ba6b5bfa27f4deb6597cc6ec20573fda",
     chainId: "42161",
-    fromBlock: 66553295,
-    toBlock: "latest"
+    fromBlock: 70124014,
+    toBlock: 72509478,
+    blockIterationSize: 100000
   },
   {
     stakingPoolName: "cFRM Arbitrum Open Staking",
@@ -44,7 +47,8 @@ const data: StakingContractDataItem[] = [
     tokenContractAddress: "0xe685d3cc0be48bd59082ede30c3b64cbfc0326e2",
     chainId: "42161",
     fromBlock: 66553295,
-    toBlock: "latest"
+    toBlock: "latest",
+    blockIterationSize: 100000
   },
   {
     stakingPoolName: "cFRM BSC Open Staking",
@@ -52,8 +56,9 @@ const data: StakingContractDataItem[] = [
     stakingPoolType: "open",
     tokenContractAddress: "0xaf329a957653675613d0d98f49fc93326aeb36fc",
     chainId: "56",
-    fromBlock: 17533067,
-    toBlock: 18033067
+    fromBlock: 17333067,
+    toBlock: "latest",
+    blockIterationSize: 10000
   }
 ];
 
@@ -65,10 +70,12 @@ const data: StakingContractDataItem[] = [
   for (const item of data) {
     const stakingPoolName = item.stakingPoolName;
     const stakingContractAddress = item.stakingContractAddress;
+    const stakingPoolType = item.stakingPoolType
     const tokenContractAddress = item.tokenContractAddress;
     const chainId = item.chainId;
     const fromBlock = item.fromBlock;
     const toBlock = item.toBlock;
+    const blockIterationSize = item.blockIterationSize;
     const rpcUrl = await getRpcUrl(chainId, APP_NAME, DB_CONNECTION_STRING, DB_NAME, DB_COLLECTION);
 
     try {
@@ -76,14 +83,28 @@ const data: StakingContractDataItem[] = [
       const decimals = await getTokenDecimals(tokenContractAddress, web3Instance);
       console.log("Token decimals:", decimals);
 
-      if (item.stakingPoolType === "standard") {
-        const stakers = await getUniqueStakers(stakingContractAddress, web3Instance, fromBlock, toBlock);
+      if (stakingPoolType === "standard") {
+        const stakers = await getUniqueStakers(
+          stakingPoolName,
+          stakingContractAddress,
+          stakingPoolType,
+          tokenContractAddress,
+          chainId,
+          web3Instance,
+          fromBlock,
+          toBlock,
+          blockIterationSize,
+          DB_NAME,
+          DB_COLLECTION_STAKING_SNAPSHOT,
+          DB_CONNECTION_STRING
+        );
         console.log("Unique staker addresses:", stakers);
 
         const stakedBalances = await getStakedBalances(
+          stakingPoolName,
+          stakingContractAddress,
           stakers,
           decimals,
-          stakingContractAddress,
           web3Instance
         );
         console.log("Staked balances:", stakedBalances);
@@ -100,11 +121,31 @@ const data: StakingContractDataItem[] = [
 
         // Add the result to the finalResults array
         finalResults.push(result);
-      } else if (item.stakingPoolType === "open") {
-        const uniqueStakers = await getUniqueStakersFromOpenStaking(web3Instance, stakingContractAddress, tokenContractAddress, fromBlock, toBlock);
+      } else if (stakingPoolType === "open") {
+        const uniqueStakers = await getUniqueStakersFromOpenStaking(
+          stakingPoolName,
+          stakingContractAddress,
+          stakingPoolType,
+          tokenContractAddress,
+          chainId,
+          web3Instance,
+          fromBlock,
+          toBlock,
+          blockIterationSize,
+          DB_NAME,
+          DB_COLLECTION_STAKING_SNAPSHOT,
+          DB_CONNECTION_STRING
+        );
         console.log("Unique staker addresses from open staking:", uniqueStakers);
 
-        const stakedBalances = await getOpenStakingStakedBalances(web3Instance, stakingContractAddress, tokenContractAddress, uniqueStakers, decimals);
+        const stakedBalances = await getOpenStakingStakedBalances(
+          stakingPoolName, 
+          stakingContractAddress, 
+          tokenContractAddress, 
+          uniqueStakers, 
+          decimals,
+          web3Instance
+          );
         console.log("Staked balances from open staking:", stakedBalances);
 
         const result = {
@@ -134,4 +175,16 @@ const data: StakingContractDataItem[] = [
   finalResults.push({ stakingPoolName: "totalStakedBalances", stakedBalances: totalStakedBalances });
 
   console.log("Final Results:", JSON.stringify(finalResults, null, 2));
+  fs.writeFile(
+    "./uniqueStakers.json",
+    JSON.stringify(finalResults, null, 2),
+    (err) => {
+      if (err) {
+        console.error("Error saving uniqueStakers.json:", err);
+      } else {
+        console.log("uniqueStakers.json saved successfully.");
+      }
+    }
+  );
+
 })();
