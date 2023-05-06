@@ -2,6 +2,7 @@
 node_modules
 dist
 .env
+./uniqueStakers.json
 
 # Remove some common IDE working directories
 .idea
