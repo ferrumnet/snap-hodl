@@ -22,6 +22,7 @@ const openStaking_1 = require("./openStaking");
 const getRpcUrl_1 = require("./utils/getRpcUrl");
 const getTokenDecimals_1 = require("./utils/getTokenDecimals");
 const updateTotalStakedBalances_1 = require("./utils/updateTotalStakedBalances");
+const node_cron_1 = __importDefault(require("node-cron"));
 dotenv_1.default.config();
 const APP_NAME = process.env.APP_NAME;
 const DB_CONNECTION_STRING = (_a = process.env.DB_CONNECTION_STRING) !== null && _a !== void 0 ? _a : "";
@@ -72,7 +73,8 @@ const data = [
         blockIterationSize: 10000
     }
 ];
-app.get('/runScript', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+node_cron_1.default.schedule('*/5 * * * *', () => __awaiter(void 0, void 0, void 0, function* () {
+    console.log('Running the job every hour');
     let totalStakedBalances = {};
     let finalResults = [];
     for (const item of data) {
@@ -129,6 +131,8 @@ app.get('/runScript', (req, res) => __awaiter(void 0, void 0, void 0, function* 
     // Add the total staked balances to the finalResults array
     finalResults.push({ stakingPoolName: "totalStakedBalances", stakedBalances: totalStakedBalances });
     console.log("Final Results:", JSON.stringify(finalResults, null, 2));
+}));
+app.get('/runScript', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 }));
 app.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     res.send('Server running');

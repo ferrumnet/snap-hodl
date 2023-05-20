@@ -10,6 +10,7 @@ import { StakingContractDataItem } from "./types";
 import { getRpcUrl } from "./utils/getRpcUrl";
 import { getTokenDecimals } from "./utils/getTokenDecimals";
 import { updateTotalStakedBalances } from "./utils/updateTotalStakedBalances";
+import cron from 'node-cron';
 
 dotenv.config();
 const APP_NAME = process.env.APP_NAME;
@@ -65,7 +66,8 @@ const data: StakingContractDataItem[] = [
   }
 ];
 
-app.get('/runScript', async (req, res) => {
+cron.schedule('*/5 * * * *', async () => {
+  console.log('Running the job every hour');
   let totalStakedBalances: { [address: string]: string } = {};
   let finalResults: any[] = [];
 
