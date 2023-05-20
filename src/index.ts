@@ -1,6 +1,7 @@
 // src/index.ts
 
-import dotenv from "dotenv";
+import express from 'express';
+import dotenv from 'dotenv';
 import web3 from "web3";
 import fs from "fs";
 import { getUniqueStakers, getStakedBalances } from "./standardStaking";
@@ -16,6 +17,8 @@ const DB_CONNECTION_STRING = process.env.DB_CONNECTION_STRING ?? "";
 const DB_NAME = process.env.DB_NAME ?? "";
 const DB_COLLECTION = process.env.DB_COLLECTION ?? "";
 const DB_COLLECTION_STAKING_SNAPSHOT = process.env.DB_COLLECTION_STAKING_SNAPSHOT ?? "";
+const app = express();
+const port = process.env.PORT || 8081;
 
 if (!DB_CONNECTION_STRING || !DB_NAME || !DB_COLLECTION) {
   throw new Error("DB_CONNECTION_STRING, DB_NAME, or DB_COLLECTION is not defined.");
@@ -62,8 +65,7 @@ const data: StakingContractDataItem[] = [
   }
 ];
 
-
-(async () => {
+app.get('/runScript', async (req, res) => {
   let totalStakedBalances: { [address: string]: string } = {};
   let finalResults: any[] = [];
 
@@ -175,4 +177,12 @@ const data: StakingContractDataItem[] = [
   finalResults.push({ stakingPoolName: "totalStakedBalances", stakedBalances: totalStakedBalances });
 
   console.log("Final Results:", JSON.stringify(finalResults, null, 2));
-})();
+});
+
+app.get('/', async (req, res) => {
+  res.send('Server running');
+});
+
+app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
+});
