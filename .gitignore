@@ -1,8 +1,8 @@
 .DS_Store
 node_modules
 dist
+build
 .env
-uniqueStakers.json
 
 # Remove some common IDE working directories
 .idea
