@@ -7,3 +7,8 @@ build
 # Remove some common IDE working directories
 .idea
 .vscode
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
