@@ -175,16 +175,16 @@ const data: StakingContractDataItem[] = [
   finalResults.push({ stakingPoolName: "totalStakedBalances", stakedBalances: totalStakedBalances });
 
   console.log("Final Results:", JSON.stringify(finalResults, null, 2));
-  fs.writeFile(
-    "./uniqueStakers.json",
-    JSON.stringify(finalResults, null, 2),
-    (err) => {
-      if (err) {
-        console.error("Error saving uniqueStakers.json:", err);
-      } else {
-        console.log("uniqueStakers.json saved successfully.");
-      }
-    }
-  );
+  // fs.writeFile(
+  //   "./uniqueStakers.json",
+  //   JSON.stringify(finalResults, null, 2),
+  //   (err) => {
+  //     if (err) {
+  //       console.error("Error saving uniqueStakers.json:", err);
+  //     } else {
+  //       console.log("uniqueStakers.json saved successfully.");
+  //     }
+  //   }
+  // );
 
 })();
