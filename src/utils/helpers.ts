@@ -147,9 +147,13 @@ export const processStakingContractDataItem = async (
 };
 
 export const getSnapHodlConfigBalance = async (snapHodlConfig: SnapHodlConfig) => {
+    if (!snapHodlConfig.isActive) {
+        return;
+    }
     const client = new MongoClient(DB_CONNECTION_STRING!);
     await client.connect();
 
+    console.log(`${snapHodlConfig.snapShotConfigName} isActive:`, snapHodlConfig.isActive);
     const stakingContractObjects = snapHodlConfig.stakingContractData;
     const stakingContractDataBalances = [];
     const totalStakedBalance: { [address: string]: BigNumber } = {};
