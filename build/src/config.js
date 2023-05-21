@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PORT = exports.CRON_SCHEDULE = exports.ADMIN_AND_SNAP_CONFIG_API = exports.DB_SNAP_HODL_CONFIG_COLLECTION = exports.DB_COLLECTION_SNAP_CONFIG_BALANCE = exports.DB_COLLECTION_STAKING_SNAPSHOT = exports.DB_COLLECTION = exports.DB_NAME = exports.DB_CONNECTION_STRING = exports.APP_NAME = void 0;
+exports.PORT = exports.CRON_SCHEDULE = exports.ADMIN_AND_SNAP_CONFIG_API = exports.DB_COLLECTION_SNAP_HODL_CONFIG = exports.DB_COLLECTION_SNAP_CONFIG_BALANCE = exports.DB_COLLECTION_STAKING_SNAPSHOT = exports.DB_COLLECTION = exports.DB_NAME = exports.DB_CONNECTION_STRING = exports.APP_NAME = void 0;
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 exports.APP_NAME = process.env.APP_NAME;
@@ -13,7 +13,7 @@ exports.DB_NAME = process.env.DB_NAME;
 exports.DB_COLLECTION = process.env.DB_COLLECTION;
 exports.DB_COLLECTION_STAKING_SNAPSHOT = process.env.DB_COLLECTION_STAKING_SNAPSHOT;
 exports.DB_COLLECTION_SNAP_CONFIG_BALANCE = process.env.DB_COLLECTION_SNAP_CONFIG_BALANCE;
-exports.DB_SNAP_HODL_CONFIG_COLLECTION = process.env.DB_SNAP_HODL_CONFIG_COLLECTION;
+exports.DB_COLLECTION_SNAP_HODL_CONFIG = process.env.DB_COLLECTION_SNAP_HODL_CONFIG;
 exports.ADMIN_AND_SNAP_CONFIG_API = process.env.ADMIN_AND_SNAP_CONFIG_API;
 exports.CRON_SCHEDULE = process.env.CRON_SCHEDULE;
 exports.PORT = process.env.PORT;

@@ -1,7 +1,7 @@
 // src/SnapHodlConfig.ts
 
 import mongoose, { Document, Schema } from 'mongoose';
-import { DB_SNAP_HODL_CONFIG_COLLECTION } from '../config';
+import { DB_COLLECTION_SNAP_HODL_CONFIG } from '../config';
 
 import dotenv from 'dotenv';
 
@@ -73,7 +73,7 @@ const SnapHodlConfigSchema = new Schema<ISnapHodlConfig>({
     snapShotConfigName: { type: String, required: true },
     isActive: { type: Boolean, required: true },
     stakingContractData: [stakingContractDataSchema]
-}, { collection: DB_SNAP_HODL_CONFIG_COLLECTION });
+}, { collection: DB_COLLECTION_SNAP_HODL_CONFIG });
 
 const SnapHodlConfig = mongoose.model<ISnapHodlConfig>('SnapHodlConfig', SnapHodlConfigSchema);
 
