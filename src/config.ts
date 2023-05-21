@@ -22,8 +22,7 @@ const envVariables = [
   { name: 'DB_COLLECTION', value: DB_COLLECTION },
   { name: 'DB_COLLECTION_STAKING_SNAPSHOT', value: DB_COLLECTION_STAKING_SNAPSHOT },
   { name: 'DB_COLLECTION_SNAP_CONFIG_BALANCE', value: DB_COLLECTION_SNAP_CONFIG_BALANCE },
-  { name: 'CRON_SCHEDULE', value: CRON_SCHEDULE },
-  { name: 'PORT', value: PORT }
+  { name: 'CRON_SCHEDULE', value: CRON_SCHEDULE }
 ];
 
 // Check if each environment variable is set
