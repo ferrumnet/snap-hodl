@@ -5,7 +5,7 @@ import web3 from "web3";
 import standardStakingContractAbi from "../ABI/standardStakingContractAbi.json";
 import { MongoClient } from "mongodb";
 import { BigNumber } from "bignumber.js";
-import { saveStakingSnapshot, getLatestStakingSnapshot } from "./services/stakingService";
+import { saveStakingSnapshot, getLatestStakingSnapshot, saveStakedBalances } from "./services/stakingService";
 
 export async function getUniqueStakers(
   stakingPoolName: string,
@@ -64,7 +64,7 @@ export async function getUniqueStakers(
 
     try {
       const logs = await web3Instance.eth.getPastLogs(stakedEventFilter);
-      console.log("Fetched logs:", logs);
+      // console.log("Fetched logs:", logs);
 
       logs.forEach((log) => {
         const eventInterface = stakingContract.options.jsonInterface.find(
@@ -113,9 +113,15 @@ export async function getUniqueStakers(
 export async function getStakedBalances(
   stakingPoolName: string,
   stakingContractAddress: string,
+  stakingPoolType: string,
+  tokenContractAddress: string,
+  chainId: string,
   stakers: string[],
   decimals: number,
-  web3Instance: web3
+  web3Instance: web3,
+  dbName: string,
+  dbCollection: string,
+  connectionString: string
 ): Promise<{ [stakerAddress: string]: string }> {
   console.log(`Fetching staked balances: `, stakingPoolName, " | ", stakingContractAddress);
 
@@ -126,17 +132,31 @@ export async function getStakedBalances(
     stakingContractAddress
   );
 
-  for (const staker of stakers) {
-    try {
-      const balance = await stakingContract.methods.stakeOf(staker).call();
-      const convertedBalance = new BigNumber(balance)
-        .dividedBy(new BigNumber(10).pow(decimals))
-        .toString();
-      stakedBalances[staker] = convertedBalance;
-    } catch (error) {
-      console.error(`Error fetching staked balance for ${staker}:`, error);
+  try {
+    for (const staker of stakers) {
+      try {
+        const balanceRaw = await stakingContract.methods.stakeOf(staker).call();
+        const humanReadableBalance = new BigNumber(balanceRaw)
+          .dividedBy(new BigNumber(10).pow(decimals))
+          .toString();
+        stakedBalances[staker] = humanReadableBalance;
+      } catch (error) {
+        console.error(`Error fetching staked balance for ${staker}:`, error);
+      }
     }
+    await saveStakedBalances(
+      stakingContractAddress,
+      tokenContractAddress,
+      chainId,
+      stakedBalances,
+      dbName,
+      dbCollection,
+      connectionString
+  );
+  } catch (error) {
+    console.error("Error fetching staked balances from Standard Staking Contract:", error);
   }
+  
 
   console.log("Staked balances fetched.");
   return stakedBalances;

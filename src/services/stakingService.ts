@@ -82,3 +82,43 @@ export async function saveStakingSnapshot(
         await client.close();
     }
 }
+
+export async function saveStakedBalances(
+    stakingContractAddress: string,
+    tokenContractAddress: string,
+    chainId: string,
+    stakedBalances: { [stakerAddress: string]: string },
+    dbName: string,
+    dbCollection: string,
+    connectionString: string
+) {
+    const client = new MongoClient(connectionString);
+    try {
+        await client.connect();
+        const database = client.db(dbName);
+        const collection = database.collection(dbCollection);
+
+        const filter = {
+            stakingContractAddress,
+            tokenContractAddress,
+            chainId
+        };
+
+        const update = {
+            $set: {
+                stakedBalances,
+                timestamp: new Date()
+            }
+        };
+
+        const options = {
+            upsert: true
+        };
+
+        await collection.updateOne(filter, update, options);
+    } catch (err) {
+        console.error("Error saving staked balances to the database:", err);
+    } finally {
+        await client.close();
+    }
+}
