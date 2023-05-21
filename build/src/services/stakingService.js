@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.saveStakingSnapshot = exports.getLatestStakingSnapshot = void 0;
+exports.saveStakedBalances = exports.saveStakingSnapshot = exports.getLatestStakingSnapshot = void 0;
 const mongodb_1 = require("mongodb");
 function getLatestStakingSnapshot(stakingContractAddress, tokenContractAddress, chainId, dbName, dbCollection, connectionString) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -76,3 +76,35 @@ function saveStakingSnapshot(stakingPoolName, stakingContractAddress, stakingPoo
     });
 }
 exports.saveStakingSnapshot = saveStakingSnapshot;
+function saveStakedBalances(stakingContractAddress, tokenContractAddress, chainId, stakedBalances, dbName, dbCollection, connectionString) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const client = new mongodb_1.MongoClient(connectionString);
+        try {
+            yield client.connect();
+            const database = client.db(dbName);
+            const collection = database.collection(dbCollection);
+            const filter = {
+                stakingContractAddress,
+                tokenContractAddress,
+                chainId
+            };
+            const update = {
+                $set: {
+                    stakedBalances,
+                    timestamp: new Date()
+                }
+            };
+            const options = {
+                upsert: true
+            };
+            yield collection.updateOne(filter, update, options);
+        }
+        catch (err) {
+            console.error("Error saving staked balances to the database:", err);
+        }
+        finally {
+            yield client.close();
+        }
+    });
+}
+exports.saveStakedBalances = saveStakedBalances;

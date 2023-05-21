@@ -42,7 +42,7 @@ function getUniqueStakers(stakingPoolName, stakingContractAddress, stakingPoolTy
             };
             try {
                 const logs = yield web3Instance.eth.getPastLogs(stakedEventFilter);
-                console.log("Fetched logs:", logs);
+                // console.log("Fetched logs:", logs);
                 logs.forEach((log) => {
                     const eventInterface = stakingContract.options.jsonInterface.find((i) => i.signature === log.topics[0]);
                     if (!eventInterface) {
@@ -66,22 +66,28 @@ function getUniqueStakers(stakingPoolName, stakingContractAddress, stakingPoolTy
     });
 }
 exports.getUniqueStakers = getUniqueStakers;
-function getStakedBalances(stakingPoolName, stakingContractAddress, stakers, decimals, web3Instance) {
+function getStakedBalances(stakingPoolName, stakingContractAddress, stakingPoolType, tokenContractAddress, chainId, stakers, decimals, web3Instance, dbName, dbCollection, connectionString) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log(`Fetching staked balances: `, stakingPoolName, " | ", stakingContractAddress);
         const stakedBalances = {};
         const stakingContract = new web3Instance.eth.Contract(standardStakingContractAbi_json_1.default, stakingContractAddress);
-        for (const staker of stakers) {
-            try {
-                const balance = yield stakingContract.methods.stakeOf(staker).call();
-                const convertedBalance = new bignumber_js_1.BigNumber(balance)
-                    .dividedBy(new bignumber_js_1.BigNumber(10).pow(decimals))
-                    .toString();
-                stakedBalances[staker] = convertedBalance;
+        try {
+            for (const staker of stakers) {
+                try {
+                    const balanceRaw = yield stakingContract.methods.stakeOf(staker).call();
+                    const humanReadableBalance = new bignumber_js_1.BigNumber(balanceRaw)
+                        .dividedBy(new bignumber_js_1.BigNumber(10).pow(decimals))
+                        .toString();
+                    stakedBalances[staker] = humanReadableBalance;
+                }
+                catch (error) {
+                    console.error(`Error fetching staked balance for ${staker}:`, error);
+                }
             }
-            catch (error) {
-                console.error(`Error fetching staked balance for ${staker}:`, error);
-            }
+            yield (0, stakingService_1.saveStakedBalances)(stakingContractAddress, tokenContractAddress, chainId, stakedBalances, dbName, dbCollection, connectionString);
+        }
+        catch (error) {
+            console.error("Error fetching staked balances from Standard Staking Contract:", error);
         }
         console.log("Staked balances fetched.");
         return stakedBalances;
