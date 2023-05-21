@@ -71,17 +71,18 @@ function getUniqueStakersFromOpenStaking(stakingPoolName, stakingContractAddress
     });
 }
 exports.getUniqueStakersFromOpenStaking = getUniqueStakersFromOpenStaking;
-function getOpenStakingStakedBalances(stakingPoolName, stakingContractAddress, tokenContractAddress, uniqueStakers, decimals, web3Instance) {
+function getOpenStakingStakedBalances(stakingPoolName, stakingContractAddress, tokenContractAddress, chainId, uniqueStakers, decimals, web3Instance, dbName, dbCollection, connectionString) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log(`Fetching staked balances from Open Staking Contract: `, stakingPoolName, " | ", stakingContractAddress);
         const stakingContract = new web3Instance.eth.Contract(openStakingContractAbi_json_1.default, stakingContractAddress);
         const stakedBalances = {};
         try {
             for (const stakerAddress of uniqueStakers) {
-                const stakedBalanceRaw = yield stakingContract.methods.stakeOf(tokenContractAddress, stakerAddress).call();
-                const stakedBalance = new bignumber_js_1.BigNumber(stakedBalanceRaw).dividedBy(new bignumber_js_1.BigNumber(10).pow(decimals)).toString();
-                stakedBalances[stakerAddress] = stakedBalance;
+                const balanceRaw = yield stakingContract.methods.stakeOf(tokenContractAddress, stakerAddress).call();
+                const humanReadableBalance = new bignumber_js_1.BigNumber(balanceRaw).dividedBy(new bignumber_js_1.BigNumber(10).pow(decimals)).toString();
+                stakedBalances[stakerAddress] = humanReadableBalance;
             }
+            yield (0, stakingService_1.saveStakedBalances)(stakingContractAddress, tokenContractAddress, chainId, stakedBalances, dbName, dbCollection, connectionString);
         }
         catch (error) {
             console.error("Error fetching staked balances from Open Staking Contract:", error);
