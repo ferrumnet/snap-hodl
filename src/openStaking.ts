@@ -6,7 +6,7 @@ import { BigNumber } from "bignumber.js";
 import { AbiItem, AbiInput } from "web3-utils";
 import tokenContractAbi from "../ABI/tokenContractAbi.json";
 import openStakingContractAbi from "../ABI/openStakingContractAbi.json";
-import { saveStakingSnapshot, getLatestStakingSnapshot } from "./services/stakingService";
+import { saveStakingSnapshot, getLatestStakingSnapshot, saveStakedBalances } from "./services/stakingService";
 
 export async function getUniqueStakersFromOpenStaking(
     stakingPoolName: string,
@@ -119,9 +119,13 @@ export async function getOpenStakingStakedBalances(
     stakingPoolName: string,
     stakingContractAddress: string,
     tokenContractAddress: string,
+    chainId: string,
     uniqueStakers: Set<string>,
     decimals: number,
-    web3Instance: web3
+    web3Instance: web3,
+    dbName: string,
+    dbCollection: string,
+    connectionString: string
 ): Promise<{ [stakerAddress: string]: string }> {
     console.log(`Fetching staked balances from Open Staking Contract: `, stakingPoolName, " | ", stakingContractAddress);
 
@@ -130,10 +134,19 @@ export async function getOpenStakingStakedBalances(
 
     try {
         for (const stakerAddress of uniqueStakers) {
-            const stakedBalanceRaw = await stakingContract.methods.stakeOf(tokenContractAddress, stakerAddress).call();
-            const stakedBalance = new BigNumber(stakedBalanceRaw).dividedBy(new BigNumber(10).pow(decimals)).toString();
-            stakedBalances[stakerAddress] = stakedBalance;
+            const balanceRaw = await stakingContract.methods.stakeOf(tokenContractAddress, stakerAddress).call();
+            const humanReadableBalance = new BigNumber(balanceRaw).dividedBy(new BigNumber(10).pow(decimals)).toString();
+            stakedBalances[stakerAddress] = humanReadableBalance;
         }
+        await saveStakedBalances(
+            stakingContractAddress,
+            tokenContractAddress,
+            chainId,
+            stakedBalances,
+            dbName,
+            dbCollection,
+            connectionString
+        );
     } catch (error) {
         console.error("Error fetching staked balances from Open Staking Contract:", error);
     }
