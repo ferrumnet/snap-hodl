@@ -13,7 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createSnapHodlConfig = exports.getSnapHodlConfigs = void 0;
+exports.createSnapHodlConfig = exports.getSnapHodlConfigs = exports.retrieveSnapHodlConfigs = void 0;
 const SnapHodlConfig_1 = __importDefault(require("../models/SnapHodlConfig"));
 function sortStakingContractData(data) {
     return data.sort((a, b) => a.stakingPoolName.localeCompare(b.stakingPoolName));
@@ -21,9 +21,23 @@ function sortStakingContractData(data) {
 function toLowerCaseStakingContractData(data) {
     return data.map(item => (Object.assign(Object.assign({}, item), { stakingContractAddress: item.stakingContractAddress.toLowerCase(), tokenContractAddress: item.tokenContractAddress.toLowerCase(), stakingPoolType: item.stakingPoolType.toLowerCase() })));
 }
+const retrieveSnapHodlConfigs = () => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        return yield SnapHodlConfig_1.default.find();
+    }
+    catch (err) {
+        if (err instanceof Error) {
+            throw new Error(err.message);
+        }
+        else {
+            throw new Error('An error occurred when attempting to fetch SnapHodlConfigs');
+        }
+    }
+});
+exports.retrieveSnapHodlConfigs = retrieveSnapHodlConfigs;
 const getSnapHodlConfigs = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const snapHodlConfigs = yield SnapHodlConfig_1.default.find();
+        const snapHodlConfigs = yield (0, exports.retrieveSnapHodlConfigs)();
         res.json(snapHodlConfigs);
     }
     catch (err) {
@@ -31,7 +45,7 @@ const getSnapHodlConfigs = (req, res) => __awaiter(void 0, void 0, void 0, funct
             res.status(500).json({ message: err.message });
         }
         else {
-            res.status(500).json({ message: 'An error occurred' });
+            res.status(500).json({ message: 'An error occurred when attempting to request SnapHodlConfigs to be retrieved' });
         }
     }
 });

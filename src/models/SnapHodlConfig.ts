@@ -75,6 +75,6 @@ const SnapHodlConfigSchema = new Schema<ISnapHodlConfig>({
     stakingContractData: [stakingContractDataSchema]
 }, { collection: DB_COLLECTION_SNAP_HODL_CONFIG });
 
-const SnapHodlConfig = mongoose.model<ISnapHodlConfig>('SnapHodlConfig', SnapHodlConfigSchema);
+const SnapHodlConfigModel = mongoose.model<ISnapHodlConfig>('SnapHodlConfigModel', SnapHodlConfigSchema);
 
-export default SnapHodlConfig;
+export default SnapHodlConfigModel;

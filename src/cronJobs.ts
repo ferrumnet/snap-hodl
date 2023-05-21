@@ -4,14 +4,14 @@ import cron from 'node-cron';
 import axios from "axios";
 import _ from 'lodash';
 import { SnapHodlConfig, StakingContractDataItem } from "./types";
+import { retrieveSnapHodlConfigs } from './controllers/snapHodlConfigController';
 import { processStakingContractDataItem, getSnapHodlConfigBalance } from "./utils/helpers";
 import {
     APP_NAME,
     DB_CONNECTION_STRING,
     DB_NAME,
     DB_COLLECTION_STAKING_SNAPSHOT,
-    CRON_SCHEDULE,
-    ADMIN_AND_SNAP_CONFIG_API
+    CRON_SCHEDULE
 } from './config';
 
 export const scheduleJobs = () => {
@@ -20,12 +20,11 @@ export const scheduleJobs = () => {
         console.log('Running the job every 5 minutes');
         try {
             // Fetch data from the API
-            const response = await axios.get(`${ADMIN_AND_SNAP_CONFIG_API}/snapHodlConfig`);
-            const data = response.data;
-            const snapHodlConfigs: SnapHodlConfig[] = response.data;
+            
+            const snapHodlConfigs: SnapHodlConfig[] = await retrieveSnapHodlConfigs();
 
             let uniqueStakingContractDataItems: StakingContractDataItem[] = [];
-            for (const item of data) {
+            for (const item of snapHodlConfigs) {
                 const { stakingContractData, isActive } = item;
                 if (isActive) {
                     uniqueStakingContractDataItems = [

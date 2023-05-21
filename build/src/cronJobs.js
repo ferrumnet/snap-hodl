@@ -15,8 +15,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.scheduleJobs = void 0;
 const node_cron_1 = __importDefault(require("node-cron"));
-const axios_1 = __importDefault(require("axios"));
 const lodash_1 = __importDefault(require("lodash"));
+const snapHodlConfigController_1 = require("./controllers/snapHodlConfigController");
 const helpers_1 = require("./utils/helpers");
 const config_1 = require("./config");
 const scheduleJobs = () => {
@@ -25,11 +25,9 @@ const scheduleJobs = () => {
         console.log('Running the job every 5 minutes');
         try {
             // Fetch data from the API
-            const response = yield axios_1.default.get(`${config_1.ADMIN_AND_SNAP_CONFIG_API}/snapHodlConfig`);
-            const data = response.data;
-            const snapHodlConfigs = response.data;
+            const snapHodlConfigs = yield (0, snapHodlConfigController_1.retrieveSnapHodlConfigs)();
             let uniqueStakingContractDataItems = [];
-            for (const item of data) {
+            for (const item of snapHodlConfigs) {
                 const { stakingContractData, isActive } = item;
                 if (isActive) {
                     uniqueStakingContractDataItems = [

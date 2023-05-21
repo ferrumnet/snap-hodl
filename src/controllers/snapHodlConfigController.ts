@@ -1,7 +1,8 @@
 // src/controllers/snapHodlConfigController.ts
 
 import { Request, Response } from 'express';
-import SnapHodlConfig from '../models/SnapHodlConfig';
+import SnapHodlConfigModel from '../models/SnapHodlConfig';
+import { SnapHodlConfig } from '../types';
 
 function sortStakingContractData(data: any[]) {
     return data.sort((a, b) => a.stakingPoolName.localeCompare(b.stakingPoolName));
@@ -16,18 +17,34 @@ function toLowerCaseStakingContractData(data: any[]) {
     }));
 }
 
+
+export const retrieveSnapHodlConfigs = async (): Promise<SnapHodlConfig[]> => {
+    try {
+        return await SnapHodlConfigModel.find();
+    } catch (err) {
+        if (err instanceof Error) {
+            throw new Error(err.message);
+        } else {
+            throw new Error('An error occurred when attempting to fetch SnapHodlConfigs' );
+        }
+    }
+};
+
+
+
 export const getSnapHodlConfigs = async (req: Request, res: Response) => {
     try {
-        const snapHodlConfigs = await SnapHodlConfig.find();
+        const snapHodlConfigs = await retrieveSnapHodlConfigs();
         res.json(snapHodlConfigs);
     } catch (err) {
         if (err instanceof Error) {
             res.status(500).json({ message: err.message });
         } else {
-            res.status(500).json({ message: 'An error occurred' });
+            res.status(500).json({ message: 'An error occurred when attempting to request SnapHodlConfigs to be retrieved' });
         }
     }
 };
+
 
 export const createSnapHodlConfig = async (req: Request, res: Response) => {
     const { snapShotConfigName, isActive, stakingContractData } = req.body;
@@ -39,7 +56,7 @@ export const createSnapHodlConfig = async (req: Request, res: Response) => {
     const sortedStakingContractData = sortStakingContractData(lowerCaseStakingContractData);
 
     // Check for duplicate stakingContractData
-    const duplicateConfig = await SnapHodlConfig.findOne({
+    const duplicateConfig = await SnapHodlConfigModel.findOne({
         stakingContractData: { $eq: sortedStakingContractData },
     });
 
@@ -49,7 +66,7 @@ export const createSnapHodlConfig = async (req: Request, res: Response) => {
         });
     }
 
-    const newSnapHodlConfig = new SnapHodlConfig({
+    const newSnapHodlConfig = new SnapHodlConfigModel({
         snapShotConfigName,
         isActive,
         stakingContractData: sortedStakingContractData,
