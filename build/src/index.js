@@ -16,13 +16,26 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const config_1 = require("./config");
 const express_1 = __importDefault(require("express"));
 const dotenv_1 = __importDefault(require("dotenv"));
+const mongoose_1 = __importDefault(require("mongoose"));
 const cronJobs_1 = require("./cronJobs");
+const snapHodlConfigController_1 = require("./controllers/snapHodlConfigController");
+const cors_1 = __importDefault(require("cors"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
+app.use(express_1.default.json());
+// Enable all CORS requests
+app.use((0, cors_1.default)());
+mongoose_1.default.connect(config_1.DB_CONNECTION_STRING, {
+    dbName: config_1.DB_NAME
+})
+    .then(() => console.log('MongoDB connection established'))
+    .catch(err => console.log('MongoDB connection error:', err));
 (0, cronJobs_1.scheduleJobs)();
 app.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     res.send('Server running');
 }));
+app.get('/snapHodlConfig', snapHodlConfigController_1.getSnapHodlConfigs);
+app.post('/snapHodlConfig', snapHodlConfigController_1.createSnapHodlConfig);
 app.listen(config_1.PORT, () => {
     console.log(`Server is running on ${config_1.PORT}`);
 });
