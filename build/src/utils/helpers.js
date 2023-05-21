@@ -88,8 +88,12 @@ const processStakingContractDataItem = (item, dbName, collectionName, connection
 });
 exports.processStakingContractDataItem = processStakingContractDataItem;
 const getSnapHodlConfigBalance = (snapHodlConfig) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!snapHodlConfig.isActive) {
+        return;
+    }
     const client = new mongodb_1.MongoClient(config_1.DB_CONNECTION_STRING);
     yield client.connect();
+    console.log(`${snapHodlConfig.snapShotConfigName} isActive:`, snapHodlConfig.isActive);
     const stakingContractObjects = snapHodlConfig.stakingContractData;
     const stakingContractDataBalances = [];
     const totalStakedBalance = {};

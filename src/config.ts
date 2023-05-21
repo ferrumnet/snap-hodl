@@ -10,6 +10,7 @@ export const DB_NAME = process.env.DB_NAME;
 export const DB_COLLECTION = process.env.DB_COLLECTION;
 export const DB_COLLECTION_STAKING_SNAPSHOT = process.env.DB_COLLECTION_STAKING_SNAPSHOT;
 export const DB_COLLECTION_SNAP_CONFIG_BALANCE = process.env.DB_COLLECTION_SNAP_CONFIG_BALANCE;
+export const DB_SNAP_HODL_CONFIG_COLLECTION = process.env.DB_SNAP_HODL_CONFIG_COLLECTION;
 export const ADMIN_AND_SNAP_CONFIG_API = process.env.ADMIN_AND_SNAP_CONFIG_API;
 export const CRON_SCHEDULE = process.env.CRON_SCHEDULE;
 export const PORT = process.env.PORT;

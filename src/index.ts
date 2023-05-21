@@ -1,18 +1,36 @@
 // src/index.ts
-import { PORT } from './config';
+import { DB_CONNECTION_STRING, DB_NAME, PORT } from './config';
 import express from 'express';
 import dotenv from 'dotenv';
+import mongoose from 'mongoose';
 import _ from 'lodash';
 import { scheduleJobs } from './cronJobs';
+import { getSnapHodlConfigs, createSnapHodlConfig } from './controllers/snapHodlConfigController';
+import cors from 'cors';
 
 dotenv.config();
 const app = express();
+
+app.use(express.json());
+
+// Enable all CORS requests
+app.use(cors());
+
+mongoose.connect(DB_CONNECTION_STRING as string, {
+  dbName: DB_NAME as string
+})
+  .then(() => console.log('MongoDB connection established'))
+  .catch(err => console.log('MongoDB connection error:', err));
 
 scheduleJobs();
 
 app.get('/', async (req, res) => {
   res.send('Server running');
 });
+
+app.get('/snapHodlConfig', getSnapHodlConfigs);
+
+app.post('/snapHodlConfig', createSnapHodlConfig);
 
 app.listen(PORT, () => {
   console.log(`Server is running on ${PORT}`);
