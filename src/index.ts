@@ -34,6 +34,7 @@ app.get('/snapHodlConfig', getSnapHodlConfigs);
 app.post('/snapHodlConfig', createSnapHodlConfig);
 
 app.get('/getSnapShotBySnapShotIdAndAddress/:snapShotId/:address', getSnapShotBySnapShotIdAndAddress);
+app.get('/getSnapShotBySnapShotIdAndAddress/:snapShotId/:address/raw', getSnapShotBySnapShotIdAndAddress);
 
 
 app.listen(PORT, () => {

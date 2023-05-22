@@ -4,6 +4,8 @@ import { Request, Response } from 'express';
 import SnapHodlConfigModel from '../models/SnapHodlConfig';
 import SnapHodlConfigBalanceModel from '../models/SnapHodlConfigBalance';
 import { SnapHodlConfig } from '../types';
+import mongoose from 'mongoose';
+
 
 function sortStakingContractData(data: any[]) {
     return data.sort((a, b) => a.stakingPoolName.localeCompare(b.stakingPoolName));
@@ -96,18 +98,19 @@ export const getSnapShotBySnapShotIdAndAddress = async (req: Request, res: Respo
             return res.status(404).json({ message: 'SnapShot not found' });
         }
 
-        const balanceData = snapHodlConfigBalance.totalStakedBalance.get(address);
+        const snapShotBalance = snapHodlConfigBalance.totalStakedBalance.get(address);
 
-        if (!balanceData) {
+        if (!snapShotBalance) {
             return res.status(404).json({ message: 'Address not found in SnapShot' });
         }
 
         if (raw === 'true') {
-            return res.send(balanceData);
+            return res.send(snapShotBalance.toString());
         } else {
             const result = {
                 snapShotConfigName: snapHodlConfigBalance.snapShotConfigName,
-                address: balanceData,
+                address: address,
+                snapShotBalance: snapShotBalance,
                 updatedAt: snapHodlConfigBalance.updatedAt,
             };
 
@@ -121,4 +124,3 @@ export const getSnapShotBySnapShotIdAndAddress = async (req: Request, res: Respo
         }
     }
 };
-
