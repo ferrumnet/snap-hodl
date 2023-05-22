@@ -2,7 +2,10 @@
 
 import { Request, Response } from 'express';
 import SnapHodlConfigModel from '../models/SnapHodlConfig';
+import SnapHodlConfigBalanceModel from '../models/SnapHodlConfigBalance';
 import { SnapHodlConfig } from '../types';
+import mongoose from 'mongoose';
+
 
 function sortStakingContractData(data: any[]) {
     return data.sort((a, b) => a.stakingPoolName.localeCompare(b.stakingPoolName));
@@ -25,7 +28,7 @@ export const retrieveSnapHodlConfigs = async (): Promise<SnapHodlConfig[]> => {
         if (err instanceof Error) {
             throw new Error(err.message);
         } else {
-            throw new Error('An error occurred when attempting to fetch SnapHodlConfigs' );
+            throw new Error('An error occurred when attempting to fetch SnapHodlConfigs');
         }
     }
 };
@@ -80,6 +83,46 @@ export const createSnapHodlConfig = async (req: Request, res: Response) => {
             res.status(500).json({ message: err.message });
         } else {
             res.status(500).json({ message: 'An error occurred' });
+        }
+    }
+};
+
+export const getSnapShotBySnapShotIdAndAddress = async (req: Request, res: Response) => {
+    try {
+        let { snapShotId, address } = req.params;
+        const { raw } = req.query;
+
+        address = address.toLowerCase();
+
+        const snapHodlConfigBalance = await SnapHodlConfigBalanceModel.findOne({ snapHodlConfigId: snapShotId });
+
+        if (!snapHodlConfigBalance) {
+            return res.status(404).json({ message: 'SnapShot not found' });
+        }
+
+        const snapShotBalance = snapHodlConfigBalance.totalStakedBalance.get(address);
+
+        if (!snapShotBalance) {
+            return res.status(404).json({ message: 'Address not found in SnapShot' });
+        }
+
+        if (raw === 'true') {
+            return res.send(snapShotBalance.toString());
+        } else {
+            const result = {
+                snapShotConfigName: snapHodlConfigBalance.snapShotConfigName,
+                address: address,
+                snapShotBalance: snapShotBalance,
+                updatedAt: snapHodlConfigBalance.updatedAt,
+            };
+
+            return res.json(result);
+        }
+    } catch (error) {
+        if (error instanceof Error) {
+            return res.status(500).json({ message: error.message });
+        } else {
+            return res.status(500).json({ message: "An unexpected error occurred." });
         }
     }
 };

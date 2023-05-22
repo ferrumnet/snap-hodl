@@ -7,7 +7,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-interface IStakingContractData {
+export interface IStakingContractData {
     _id?: boolean;
     stakingPoolName: { type: string, required: boolean };
     stakingContractAddress: { type: string, match: RegExp, validate: { validator: (value: any) => boolean, message: string }, required: boolean };
@@ -19,7 +19,7 @@ interface IStakingContractData {
     blockIterationSize: { type: number, min: number, required: boolean };
 }
 
-interface ISnapHodlConfig extends Document {
+export interface ISnapHodlConfig extends Document {
     snapShotConfigName: { type: string, required: boolean };
     isActive: { type: boolean, required: boolean };
     stakingContractData: IStakingContractData[];
@@ -27,7 +27,7 @@ interface ISnapHodlConfig extends Document {
 
 const ethereumAddressRegex = /^(0x)?[0-9a-f]{40}$/i;
 
-const stakingContractDataSchema = new Schema<IStakingContractData>({
+export const stakingContractDataSchema = new Schema<IStakingContractData>({
     _id: false,
     stakingPoolName: { type: String, required: true },
     stakingContractAddress: {

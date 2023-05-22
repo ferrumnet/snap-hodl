@@ -36,6 +36,8 @@ app.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 }));
 app.get('/snapHodlConfig', snapHodlConfigController_1.getSnapHodlConfigs);
 app.post('/snapHodlConfig', snapHodlConfigController_1.createSnapHodlConfig);
+app.get('/getSnapShotBySnapShotIdAndAddress/:snapShotId/:address', snapHodlConfigController_1.getSnapShotBySnapShotIdAndAddress);
+app.get('/getSnapShotBySnapShotIdAndAddress/:snapShotId/:address/raw', snapHodlConfigController_1.getSnapShotBySnapShotIdAndAddress);
 app.listen(config_1.PORT, () => {
     console.log(`Server is running on ${config_1.PORT}`);
 });

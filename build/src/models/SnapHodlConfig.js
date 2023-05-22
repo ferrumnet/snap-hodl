@@ -27,12 +27,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.stakingContractDataSchema = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const config_1 = require("../config");
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const ethereumAddressRegex = /^(0x)?[0-9a-f]{40}$/i;
-const stakingContractDataSchema = new mongoose_1.Schema({
+exports.stakingContractDataSchema = new mongoose_1.Schema({
     _id: false,
     stakingPoolName: { type: String, required: true },
     stakingContractAddress: {
@@ -76,7 +77,7 @@ const stakingContractDataSchema = new mongoose_1.Schema({
 const SnapHodlConfigSchema = new mongoose_1.Schema({
     snapShotConfigName: { type: String, required: true },
     isActive: { type: Boolean, required: true },
-    stakingContractData: [stakingContractDataSchema]
+    stakingContractData: [exports.stakingContractDataSchema]
 }, { collection: config_1.DB_COLLECTION_SNAP_HODL_CONFIG });
 const SnapHodlConfigModel = mongoose_1.default.model('SnapHodlConfigModel', SnapHodlConfigSchema);
 exports.default = SnapHodlConfigModel;
