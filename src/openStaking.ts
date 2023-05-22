@@ -90,7 +90,7 @@ export async function getUniqueStakersFromOpenStaking(
 
                 // Check if the destination address matches the staking contract address
                 if (event.dst.toLowerCase() === stakingContractAddress.toLowerCase()) {
-                    uniqueStakers.add(event.src);
+                    uniqueStakers.add(event.src.toLowerCase());
                 }
             });
 
