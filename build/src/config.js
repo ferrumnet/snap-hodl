@@ -24,8 +24,7 @@ const envVariables = [
     { name: 'DB_COLLECTION', value: exports.DB_COLLECTION },
     { name: 'DB_COLLECTION_STAKING_SNAPSHOT', value: exports.DB_COLLECTION_STAKING_SNAPSHOT },
     { name: 'DB_COLLECTION_SNAP_CONFIG_BALANCE', value: exports.DB_COLLECTION_SNAP_CONFIG_BALANCE },
-    { name: 'CRON_SCHEDULE', value: exports.CRON_SCHEDULE },
-    { name: 'PORT', value: exports.PORT }
+    { name: 'CRON_SCHEDULE', value: exports.CRON_SCHEDULE }
 ];
 // Check if each environment variable is set
 envVariables.forEach(envVar => {
