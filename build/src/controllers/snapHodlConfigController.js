@@ -13,8 +13,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createSnapHodlConfig = exports.getSnapHodlConfigs = exports.retrieveSnapHodlConfigs = void 0;
+exports.getSnapShotBySnapShotIdAndAddress = exports.createSnapHodlConfig = exports.getSnapHodlConfigs = exports.retrieveSnapHodlConfigs = void 0;
 const SnapHodlConfig_1 = __importDefault(require("../models/SnapHodlConfig"));
+const SnapHodlConfigBalance_1 = __importDefault(require("../models/SnapHodlConfigBalance"));
 function sortStakingContractData(data) {
     return data.sort((a, b) => a.stakingPoolName.localeCompare(b.stakingPoolName));
 }
@@ -84,3 +85,39 @@ const createSnapHodlConfig = (req, res) => __awaiter(void 0, void 0, void 0, fun
     }
 });
 exports.createSnapHodlConfig = createSnapHodlConfig;
+const getSnapShotBySnapShotIdAndAddress = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let { snapShotId, address } = req.params;
+        const { raw } = req.query;
+        address = address.toLowerCase();
+        const snapHodlConfigBalance = yield SnapHodlConfigBalance_1.default.findOne({ snapHodlConfigId: snapShotId });
+        if (!snapHodlConfigBalance) {
+            return res.status(404).json({ message: 'SnapShot not found' });
+        }
+        const snapShotBalance = snapHodlConfigBalance.totalStakedBalance.get(address);
+        if (!snapShotBalance) {
+            return res.status(404).json({ message: 'Address not found in SnapShot' });
+        }
+        if (raw === 'true') {
+            return res.send(snapShotBalance.toString());
+        }
+        else {
+            const result = {
+                snapShotConfigName: snapHodlConfigBalance.snapShotConfigName,
+                address: address,
+                snapShotBalance: snapShotBalance,
+                updatedAt: snapHodlConfigBalance.updatedAt,
+            };
+            return res.json(result);
+        }
+    }
+    catch (error) {
+        if (error instanceof Error) {
+            return res.status(500).json({ message: error.message });
+        }
+        else {
+            return res.status(500).json({ message: "An unexpected error occurred." });
+        }
+    }
+});
+exports.getSnapShotBySnapShotIdAndAddress = getSnapShotBySnapShotIdAndAddress;
