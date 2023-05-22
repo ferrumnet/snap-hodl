@@ -89,8 +89,10 @@ export const createSnapHodlConfig = async (req: Request, res: Response) => {
 
 export const getSnapShotBySnapShotIdAndAddress = async (req: Request, res: Response) => {
     try {
-        const { snapShotId, address } = req.params;
+        let { snapShotId, address } = req.params;
         const { raw } = req.query;
+
+        address = address.toLowerCase();
 
         const snapHodlConfigBalance = await SnapHodlConfigBalanceModel.findOne({ snapHodlConfigId: snapShotId });
 

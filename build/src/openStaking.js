@@ -57,7 +57,7 @@ function getUniqueStakersFromOpenStaking(stakingPoolName, stakingContractAddress
                     console.log("Decoded event:", event);
                     // Check if the destination address matches the staking contract address
                     if (event.dst.toLowerCase() === stakingContractAddress.toLowerCase()) {
-                        uniqueStakers.add(event.src);
+                        uniqueStakers.add(event.src.toLowerCase());
                     }
                 });
                 console.log("Unique stakers fetched for blocks", currentBlock, "to", endBlock);

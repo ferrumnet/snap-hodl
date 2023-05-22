@@ -87,8 +87,9 @@ const createSnapHodlConfig = (req, res) => __awaiter(void 0, void 0, void 0, fun
 exports.createSnapHodlConfig = createSnapHodlConfig;
 const getSnapShotBySnapShotIdAndAddress = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { snapShotId, address } = req.params;
+        let { snapShotId, address } = req.params;
         const { raw } = req.query;
+        address = address.toLowerCase();
         const snapHodlConfigBalance = yield SnapHodlConfigBalance_1.default.findOne({ snapHodlConfigId: snapShotId });
         if (!snapHodlConfigBalance) {
             return res.status(404).json({ message: 'SnapShot not found' });
