@@ -2,6 +2,7 @@
 
 import { Request, Response } from 'express';
 import SnapHodlConfigModel from '../models/SnapHodlConfig';
+import SnapHodlConfigBalanceModel from '../models/SnapHodlConfigBalance';
 import { SnapHodlConfig } from '../types';
 
 function sortStakingContractData(data: any[]) {
@@ -25,7 +26,7 @@ export const retrieveSnapHodlConfigs = async (): Promise<SnapHodlConfig[]> => {
         if (err instanceof Error) {
             throw new Error(err.message);
         } else {
-            throw new Error('An error occurred when attempting to fetch SnapHodlConfigs' );
+            throw new Error('An error occurred when attempting to fetch SnapHodlConfigs');
         }
     }
 };
@@ -83,3 +84,41 @@ export const createSnapHodlConfig = async (req: Request, res: Response) => {
         }
     }
 };
+
+export const getSnapShotBySnapShotIdAndAddress = async (req: Request, res: Response) => {
+    try {
+        const { snapShotId, address } = req.params;
+        const { raw } = req.query;
+
+        const snapHodlConfigBalance = await SnapHodlConfigBalanceModel.findOne({ snapHodlConfigId: snapShotId });
+
+        if (!snapHodlConfigBalance) {
+            return res.status(404).json({ message: 'SnapShot not found' });
+        }
+
+        const balanceData = snapHodlConfigBalance.totalStakedBalance.get(address);
+
+        if (!balanceData) {
+            return res.status(404).json({ message: 'Address not found in SnapShot' });
+        }
+
+        if (raw === 'true') {
+            return res.send(balanceData);
+        } else {
+            const result = {
+                snapShotConfigName: snapHodlConfigBalance.snapShotConfigName,
+                address: balanceData,
+                updatedAt: snapHodlConfigBalance.updatedAt,
+            };
+
+            return res.json(result);
+        }
+    } catch (error) {
+        if (error instanceof Error) {
+            return res.status(500).json({ message: error.message });
+        } else {
+            return res.status(500).json({ message: "An unexpected error occurred." });
+        }
+    }
+};
+
