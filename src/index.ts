@@ -38,6 +38,8 @@ app.get('/getSnapShotBySnapShotIdAndAddress/:snapShotId/:address/raw', getSnapSh
 
 app.get('/getAllSnapShots', getAllSnapShots);
 
+// added snapshots
+
 
 app.listen(PORT, () => {
   console.log(`Server is running on ${PORT}`);
