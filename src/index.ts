@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import _ from 'lodash';
 import { scheduleJobs } from './cronJobs';
-import { getSnapHodlConfigs, createSnapHodlConfig, getSnapShotBySnapShotIdAndAddress } from './controllers/snapHodlConfigController';
+import { getSnapHodlConfigs, createSnapHodlConfig, getSnapShotBySnapShotIdAndAddress, getAllSnapShots } from './controllers/snapHodlConfigController';
 
 import cors from 'cors';
 
@@ -35,6 +35,8 @@ app.post('/snapHodlConfig', createSnapHodlConfig);
 
 app.get('/getSnapShotBySnapShotIdAndAddress/:snapShotId/:address', getSnapShotBySnapShotIdAndAddress);
 app.get('/getSnapShotBySnapShotIdAndAddress/:snapShotId/:address/raw', getSnapShotBySnapShotIdAndAddress);
+
+app.get('/getAllSnapShots', getAllSnapShots);
 
 
 app.listen(PORT, () => {

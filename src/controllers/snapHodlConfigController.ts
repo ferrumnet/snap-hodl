@@ -126,3 +126,24 @@ export const getSnapShotBySnapShotIdAndAddress = async (req: Request, res: Respo
         }
     }
 };
+
+// New function to retrieve all documents from DB_COLLECTION_SNAP_CONFIG_BALANCE
+export const getAllSnapShots = async (req: Request, res: Response) => {
+    try {
+        const page = parseInt(req.query.page as string) || 1;  // defaults to 1 if not provided
+        const limit = parseInt(req.query.limit as string) || 10;  // defaults to 10 if not provided
+        const skip = (page - 1) * limit;
+
+        // Find all documents in the collection with pagination
+        const snapHodlConfigBalances = await SnapHodlConfigBalanceModel.find({}).skip(skip).limit(limit);
+        
+        // Send the result as a JSON response
+        return res.json(snapHodlConfigBalances);
+    } catch (error) {
+        if (error instanceof Error) {
+            return res.status(500).json({ message: error.message });
+        } else {
+            return res.status(500).json({ message: "An unexpected error occurred." });
+        }
+    }
+};
