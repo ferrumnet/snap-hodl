@@ -130,12 +130,16 @@ export const getSnapShotBySnapShotIdAndAddress = async (req: Request, res: Respo
 // New function to retrieve all documents from DB_COLLECTION_SNAP_CONFIG_BALANCE
 export const getAllSnapShots = async (req: Request, res: Response) => {
     try {
+        const query: { [key: string]: any } = {};
+        if(req.query.snapHodlConfigId){
+            query.snapHodlConfigId = req.query.snapHodlConfigId;
+        }
         const page = parseInt(req.query.page as string) || 1;  // defaults to 1 if not provided
         const limit = parseInt(req.query.limit as string) || 10;  // defaults to 10 if not provided
         const skip = (page - 1) * limit;
 
         // Find all documents in the collection with pagination
-        const snapHodlConfigBalances = await SnapHodlConfigBalanceModel.find({}).skip(skip).limit(limit);
+        const snapHodlConfigBalances = await SnapHodlConfigBalanceModel.find(query).skip(skip).limit(limit);
         
         // Send the result as a JSON response
         return res.json(snapHodlConfigBalances);
