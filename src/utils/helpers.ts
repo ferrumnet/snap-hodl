@@ -73,14 +73,14 @@ export const processStakingContractDataItem = async (
                 DB_COLLECTION_STAKING_SNAPSHOT!,
                 DB_CONNECTION_STRING!
             );
-            console.log("Staked balances:", stakedBalances);
+            // console.log("Staked balances:", stakedBalances);
 
             const result = {
                 stakingPoolName: stakingPoolName,
                 stakedBalances: stakedBalances,
             };
 
-            console.log("Result:", JSON.stringify(result, null, 2));
+            // console.log("Result:", JSON.stringify(result, null, 2));
 
             // Update the totalStakedBalances object
             updateTotalStakedBalances(stakedBalances, totalStakedBalances);
@@ -102,7 +102,7 @@ export const processStakingContractDataItem = async (
                 DB_COLLECTION_STAKING_SNAPSHOT!,
                 DB_CONNECTION_STRING!
             );
-            console.log("Unique staker addresses from open staking:", uniqueStakers);
+            // console.log("Unique staker addresses from open staking:", uniqueStakers);
 
             const stakedBalances = await getOpenStakingStakedBalances(
                 stakingPoolName,
@@ -116,14 +116,14 @@ export const processStakingContractDataItem = async (
                 DB_COLLECTION_STAKING_SNAPSHOT!,
                 DB_CONNECTION_STRING!
             );
-            console.log("Staked balances from open staking:", stakedBalances);
+            // console.log("Staked balances from open staking:", stakedBalances);
 
             const result = {
                 stakingPoolName: stakingPoolName,
                 stakedBalances: stakedBalances,
             };
 
-            console.log("Result:", JSON.stringify(result, null, 2));
+            // console.log("Result:", JSON.stringify(result, null, 2));
 
             // Update the totalStakedBalances object
             updateTotalStakedBalances(stakedBalances, totalStakedBalances);
@@ -141,7 +141,7 @@ export const processStakingContractDataItem = async (
     // Add the total staked balances to the finalResults array
     finalResults.push({ stakingPoolName: "totalStakedBalances", stakedBalances: totalStakedBalances });
 
-    console.log("Final Results:", JSON.stringify(finalResults, null, 2));
+    // console.log("Final Results:", JSON.stringify(finalResults, null, 2));
 
     return finalResults;
 };
