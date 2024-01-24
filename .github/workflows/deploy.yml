@@ -1,0 +1,43 @@
+name: Deploy main
+on:
+  push:
+    branches:
+    - main
+
+jobs:
+
+  build:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install packages, test and build artifacts
+        run: |
+          unset CI
+          npm install
+          npm run build
+      - name: Generate deployment package
+        run: rm -rf .gitignore && zip -r deploy.zip . -x '*.git*'
+
+      - name: Set outputs
+        id: vars
+        run: ls -la && du -hsc deploy.zip && echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Deploy to EB
+        uses: einaregilsson/beanstalk-deploy@v21
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: ${{ vars.APP_NAME }}
+          environment_name: ${{ vars.ENV_NAME }}
+          version_label: snap-hodl-${{ steps.vars.outputs.sha_short }}
+          region: ${{ secrets.AWS_REGION }}
+          deployment_package: deploy.zip
