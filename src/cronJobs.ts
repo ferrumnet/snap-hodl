@@ -3,9 +3,15 @@
 import cron from 'node-cron';
 import axios from "axios";
 import _ from 'lodash';
-import { SnapHodlConfig, StakingContractDataItem } from "./types";
+import { SnapHodlConfig, StakingContractDataItem, TradingVolumeContractDataItem } from "./types";
 import { retrieveSnapHodlConfigs } from './controllers/snapHodlConfigController';
-import { processStakingContractDataItem, getSnapHodlConfigBalance } from "./utils/helpers";
+import {
+    processStakingContractDataItem,
+    getSnapHodlConfigBalance,
+    processTradingContractDataItem,
+    getSnapHodlConfigTradingVolumeBalance,
+    getSnapShotBySnapShotUserVolumeAndReward,
+  } from "./utils/helpers";
 import {
     APP_NAME,
     DB_CONNECTION_STRING,
@@ -24,13 +30,18 @@ export const scheduleJobs = () => {
             const snapHodlConfigs: SnapHodlConfig[] = await retrieveSnapHodlConfigs();
 
             let uniqueStakingContractDataItems: StakingContractDataItem[] = [];
+            let uniqueTradingContractDataItems: TradingVolumeContractDataItem[] = [];
             for (const item of snapHodlConfigs) {
-                const { stakingContractData, isActive } = item;
+                const { stakingContractData, tradingVolumeContractData, isActive } = item;
                 if (isActive) {
                     uniqueStakingContractDataItems = [
                         ...uniqueStakingContractDataItems,
                         ...stakingContractData
                     ];
+                    uniqueTradingContractDataItems = [
+                        ...uniqueTradingContractDataItems,
+                        ...tradingVolumeContractData,
+                      ];
                 }
             }
 
@@ -38,6 +49,19 @@ export const scheduleJobs = () => {
             uniqueStakingContractDataItems = _.uniqBy(uniqueStakingContractDataItems, ({ stakingContractAddress, tokenContractAddress, chainId }) => {
                 return `${stakingContractAddress}-${tokenContractAddress}-${chainId}`;
             });
+
+            // Filter unique tradingVolumeContractData based on liquidityPoolAddress, tokenContractAddress, and chainId
+            uniqueTradingContractDataItems = _.uniqBy(uniqueTradingContractDataItems, ({ liquidityPoolAddress, tokenContractAddress, chainId }) => {
+                return `${liquidityPoolAddress}-${tokenContractAddress}-${chainId}`;
+                }
+            );
+
+            // Start processing uniqueTradingContractDataItems concurrently
+            await Promise.all(
+                uniqueTradingContractDataItems.map((item) =>
+                  processTradingContractDataItem(item)
+                )
+              );
 
             // Start processing uniqueStakingContractDataItems concurrently
             await Promise.all(uniqueStakingContractDataItems.map(item => processStakingContractDataItem(
@@ -48,8 +72,14 @@ export const scheduleJobs = () => {
                 APP_NAME!
             )));
 
+            // After uniqueTradingContractDataItems function calls
+            await Promise.all(snapHodlConfigs.map(getSnapHodlConfigTradingVolumeBalance));
+
             // After processStakingContractDataItem function calls
             await Promise.all(snapHodlConfigs.map(getSnapHodlConfigBalance));
+
+            // sum the volume of user and their reward
+            await Promise.all(snapHodlConfigs.map(getSnapShotBySnapShotUserVolumeAndReward));
 
             const utcStr = new Date().toUTCString();
             console.log(`Cron finished at:`, utcStr);
