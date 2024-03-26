@@ -10,13 +10,25 @@ export type StakingContractDataItem = {
   chainId: string;
   fromBlock: number | "latest";
   toBlock: number | "latest";
-  blockIterationSize: number
+  blockIterationSize: number;
+};
+
+export type TradingVolumeContractDataItem = {
+  tradingPoolName: string;
+  tradingPoolType: string;
+  tokenContractAddress: string;
+  chainId: string;
+  fromBlock: number | "latest";
+  toBlock: number | "latest";
+  blockIterationSize: number;
+  liquidityPoolAddress: string;
 };
 
 export type SnapHodlConfig = {
   _id: string;
   snapShotConfigName: string;
   stakingContractData: StakingContractDataItem[];
+  tradingVolumeContractData: TradingVolumeContractDataItem[];
   __v?: number;
   isActive: boolean;
 };
@@ -31,18 +43,24 @@ export type SnapHodlConfigFullDb = {
   stakingPoolType: string;
   uniqueStakers: string[];
   stakedBalances: { [address: string]: string };
-}
+};
 
 export type SnapHodlConfigBalance = {
   snapHodlConfigId: ObjectId;
   snapShotConfigName: string;
-  stakingContractDataBalances: {
+  stakingContractDataBalances?: {
     stakingContractAddress: string;
     tokenContractAddress: string;
     chainId: string;
     totalStakedBalance: string;
   }[];
-  totalStakedBalance: Record<string, string>;
+  totalTradingVolumeBalance?: {
+    tokenContractAddress: string;
+    chainId: string;
+    totalTradingVolume: string;
+  }[];
+  totalTradingVolume?: Record<string, string>;
+  totalStakedBalance?: Record<string, string>;
   createdAt: Date;
   updatedAt: Date;
 };

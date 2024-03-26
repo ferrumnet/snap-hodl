@@ -24,6 +24,7 @@ mongoose.connect(DB_CONNECTION_STRING as string, {
   .catch(err => console.log('MongoDB connection error:', err));
 
 scheduleJobs();
+// blockToBlockVolumeScheduleJobs();
 
 app.get('/', async (req, res) => {
   res.send('Server running');
