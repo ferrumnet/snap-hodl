@@ -37,11 +37,13 @@ export async function getUniqueStakersFromOpenStaking(
         existingSnapshot ? existingSnapshot.uniqueStakers : []
     );
 
+    // Convert block identifiers to actual block numbers
     const currentBlockNumber = await web3Instance.eth.getBlockNumber();
     const resolvedFromBlock = fromBlock === "latest" ? currentBlockNumber : fromBlock;
     const resolvedToBlock = toBlock === "latest" ? currentBlockNumber : toBlock;
 
     const step = blockIterationSize;
+
     let startBlock = resolvedFromBlock;
     if (existingSnapshot && existingSnapshot.latestBlockCaptured >= resolvedFromBlock) {
         startBlock = existingSnapshot.latestBlockCaptured + 1;
@@ -60,16 +62,37 @@ export async function getUniqueStakersFromOpenStaking(
             topics: [transferEventSignature, null, web3Instance.eth.abi.encodeParameter("address", stakingContractAddress)],
         };
 
+
         try {
             const logs = await web3Instance.eth.getPastLogs(transferEventFilter);
+            console.log("Fetched logs:", logs);
 
-            for (const log of logs) {
-                const transactionReceipt = await web3Instance.eth.getTransactionReceipt(log.transactionHash);
-                const transactionSender = transactionReceipt.from.toLowerCase();
+            logs.forEach((log) => {
+                console.log("Log:", log);
 
-                // Add the transaction sender to the set of unique stakers
-                uniqueStakers.add(transactionSender);
-            }
+                const eventInterface = tokenContract.options.jsonInterface.find(
+                    (i: any) => i.signature === log.topics[0]
+                );
+
+                if (!eventInterface) {
+                    console.error("Event interface not found for signature:", log.topics[0]);
+                    return;
+                }
+
+                const inputs = eventInterface.inputs as AbiInput[];
+
+                const event = web3Instance.eth.abi.decodeLog(
+                    inputs,
+                    log.data,
+                    log.topics.slice(1)
+                );
+                console.log("Decoded event:", event);
+
+                // Check if the destination address matches the staking contract address
+                if (event.dst.toLowerCase() === stakingContractAddress.toLowerCase()) {
+                    uniqueStakers.add(event.src.toLowerCase());
+                }
+            });
 
             console.log("Unique stakers fetched for blocks", currentBlock, "to", endBlock);
             await saveStakingSnapshot(
@@ -91,7 +114,6 @@ export async function getUniqueStakersFromOpenStaking(
 
     return uniqueStakers;
 }
-
 
 export async function getOpenStakingStakedBalances(
     stakingPoolName: string,
