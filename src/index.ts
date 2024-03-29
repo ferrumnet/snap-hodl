@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import _ from 'lodash';
 import { scheduleJobs } from './cronJobs';
-import { getSnapHodlConfigs, createSnapHodlConfig, getSnapShotBySnapShotIdAndAddress, getAllSnapShots } from './controllers/snapHodlConfigController';
+import { getSnapHodlConfigs, createSnapHodlConfig, getSnapShotBySnapShotIdAndAddress, getAllSnapShots, getChainTradingSnapShotsTotalBySnapHodlConfigIdAndChainId } from './controllers/snapHodlConfigController';
 
 import cors from 'cors';
 
@@ -18,12 +18,13 @@ app.use(express.json());
 app.use(cors());
 
 mongoose.connect(DB_CONNECTION_STRING as string, {
-  dbName: DB_NAME as string
-})
+    dbName: DB_NAME as string
+  })
   .then(() => console.log('MongoDB connection established'))
   .catch(err => console.log('MongoDB connection error:', err));
 
 scheduleJobs();
+// blockToBlockVolumeScheduleJobs();
 
 app.get('/', async (req, res) => {
   res.send('Server running');
@@ -35,6 +36,7 @@ app.post('/snapHodlConfig', createSnapHodlConfig);
 
 app.get('/getSnapShotBySnapShotIdAndAddress/:snapShotId/:address', getSnapShotBySnapShotIdAndAddress);
 app.get('/getSnapShotBySnapShotIdAndAddress/:snapShotId/:address/raw', getSnapShotBySnapShotIdAndAddress);
+app.get('/getChainTradingSnapShotsTotalBySnapHodlConfigIdAndChainId', getChainTradingSnapShotsTotalBySnapHodlConfigIdAndChainId);
 
 app.get('/getAllSnapShots', getAllSnapShots);
 
