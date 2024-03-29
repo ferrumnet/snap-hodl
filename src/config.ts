@@ -11,7 +11,12 @@ export const DB_COLLECTION = process.env.DB_COLLECTION;
 export const DB_COLLECTION_STAKING_SNAPSHOT = process.env.DB_COLLECTION_STAKING_SNAPSHOT;
 export const DB_COLLECTION_SNAP_CONFIG_BALANCE = process.env.DB_COLLECTION_SNAP_CONFIG_BALANCE;
 export const DB_COLLECTION_SNAP_HODL_CONFIG = process.env.DB_COLLECTION_SNAP_HODL_CONFIG;
+export const DB_COLLECTION_TRADING_SNAP_HODL_CONFIG =
+  process.env.DB_COLLECTION_TRADING_SNAP_HODL_CONFIG;
+export const DB_COLLECTION_TRADING_SNAPSHOT =
+  process.env.DB_COLLECTION_TRADING_SNAPSHOT;
 export const CRON_SCHEDULE = process.env.CRON_SCHEDULE;
+export const VOLUME_CRON_SCHEDULE = process.env.VOLUME_CRON_SCHEDULE;
 export const PORT = process.env.PORT;
 
 // An array to hold the environment variables
@@ -22,7 +27,9 @@ const envVariables = [
   { name: 'DB_COLLECTION', value: DB_COLLECTION },
   { name: 'DB_COLLECTION_STAKING_SNAPSHOT', value: DB_COLLECTION_STAKING_SNAPSHOT },
   { name: 'DB_COLLECTION_SNAP_CONFIG_BALANCE', value: DB_COLLECTION_SNAP_CONFIG_BALANCE },
-  { name: 'CRON_SCHEDULE', value: CRON_SCHEDULE }
+  { name: 'CRON_SCHEDULE', value: CRON_SCHEDULE },
+  { name: 'VOLUME_CRON_SCHEDULE', value: VOLUME_CRON_SCHEDULE },
+  { name: 'PORT', value: PORT },
 ];
 
 // Check if each environment variable is set
