@@ -129,7 +129,7 @@ export const processTradingContractDataItem = async (
         // Iterate through the logs in the transaction receipt
         for (const log of receipt.logs) {
             // Check if the log's address matches the token address and if the event topic is present in the log's topics
-            if (log.address.toLowerCase() === item.tokenContractAddress.toLowerCase() && log.topics.includes(buyLogs[0].topics[0])) {
+            if (log.address.toLowerCase() === item.tokenContractAddress.toLowerCase() && log.topics.includes(buyLogs[i].topics[0])) {
                 // Add the log to the matching events array
                 buyMatchingEvents.push(log);
             }
@@ -173,7 +173,7 @@ export const processTradingContractDataItem = async (
         null,
         web3Instance.eth.abi.encodeParameter(
           "address",
-          "0x20dDbFd14F316D417f5B1a981B5Dc926a4dFd4D1"
+          item.liquidityPoolAddress
         ),
       ],
     };
@@ -193,7 +193,7 @@ export const processTradingContractDataItem = async (
           // Iterate through the logs in the transaction receipt
           for (const log of receipt.logs) {
               // Check if the log's address matches the token address and if the event topic is present in the log's topics
-              if (log.address.toLowerCase() === item.tokenContractAddress.toLowerCase() && log.topics.includes(buyLogs[0].topics[0])) {
+              if (log.address.toLowerCase() === item.tokenContractAddress.toLowerCase() && log.topics.includes(sellLogs[i].topics[0])) {
                   // Add the log to the matching events array
                   sellMatchingEvents.push(log);
               }
