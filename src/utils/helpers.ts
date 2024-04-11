@@ -513,6 +513,9 @@ export const getSnapHodlConfigTradingVolumeBalance = async (
             if(!minimumTradingBalance || minimumTradingBalance === 0 || balanceBN.isGreaterThanOrEqualTo(minimumTradingBalance)){
               totalBalance = totalBalance.plus(balanceBN);
               if (totalTradingVolume[address]) {
+                if(typeof totalTradingVolume[address] === "string" || totalTradingVolume[address] instanceof String){
+                  totalTradingVolume[address] = new BigNumber(totalTradingVolume[address]);
+                }
                 totalTradingVolume[address] =
                   totalTradingVolume[address].plus(balanceBN);
               } else {
