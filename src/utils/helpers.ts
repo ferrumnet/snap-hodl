@@ -608,10 +608,11 @@ export const getSnapShotBySnapShotUserVolumeAndReward = async (
     Object.entries<string>(snapHodlConfigBalance.totalStakedBalance).forEach(
       ([address, balance]) => {
         totalVolume = totalVolume + Number(balance);
-        if (totalUserVolume[address.toLowerCase()]) {
-          totalUserVolume[address.toLowerCase()] = totalUserVolume[address.toLowerCase()].plus(balance);
+        let refactoredAddress = address.toLowerCase();
+        if (totalUserVolume[refactoredAddress]) {
+          totalUserVolume[refactoredAddress] = totalUserVolume[refactoredAddress].plus(balance);
         } else {
-          totalUserVolume[address.toLowerCase()] = balance;
+          totalUserVolume[refactoredAddress] = balance;
         }
       }
     );
@@ -619,10 +620,11 @@ export const getSnapShotBySnapShotUserVolumeAndReward = async (
     Object.entries(snapHodlConfigBalance.totalTradingVolume).forEach(
       ([address, balance]) => {
         totalVolume = totalVolume + Number(balance);
-        if (totalUserVolume[address.toLowerCase()]) {
-          totalUserVolume[address.toLowerCase()] = totalUserVolume[address.toLowerCase()].plus(balance);
+        let refactoredAddress = address.toLowerCase();
+        if (totalUserVolume[refactoredAddress]) {
+          totalUserVolume[refactoredAddress] = totalUserVolume[refactoredAddress].plus(balance);
         } else {
-          totalUserVolume[address.toLowerCase()] = balance;
+          totalUserVolume[refactoredAddress] = balance;
         }
       }
     );
