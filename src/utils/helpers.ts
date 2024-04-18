@@ -513,6 +513,9 @@ export const getSnapHodlConfigTradingVolumeBalance = async (
             if(!minimumTradingBalance || minimumTradingBalance === 0 || balanceBN.isGreaterThanOrEqualTo(minimumTradingBalance)){
               totalBalance = totalBalance.plus(balanceBN);
               if (totalTradingVolume[address]) {
+                if(typeof totalTradingVolume[address] === "string" || totalTradingVolume[address] instanceof String){
+                  totalTradingVolume[address] = new BigNumber(totalTradingVolume[address]);
+                }
                 totalTradingVolume[address] =
                   totalTradingVolume[address].plus(balanceBN);
               } else {
@@ -605,10 +608,10 @@ export const getSnapShotBySnapShotUserVolumeAndReward = async (
     Object.entries<string>(snapHodlConfigBalance.totalStakedBalance).forEach(
       ([address, balance]) => {
         totalVolume = totalVolume + Number(balance);
-        if (totalUserVolume[address]) {
-          totalUserVolume[address] = totalUserVolume[address].plus(balance);
+        if (totalUserVolume[address.toLowerCase()]) {
+          totalUserVolume[address.toLowerCase()] = totalUserVolume[address.toLowerCase()].plus(balance);
         } else {
-          totalUserVolume[address] = balance;
+          totalUserVolume[address.toLowerCase()] = balance;
         }
       }
     );
@@ -616,10 +619,10 @@ export const getSnapShotBySnapShotUserVolumeAndReward = async (
     Object.entries(snapHodlConfigBalance.totalTradingVolume).forEach(
       ([address, balance]) => {
         totalVolume = totalVolume + Number(balance);
-        if (totalUserVolume[address]) {
-          totalUserVolume[address] = totalUserVolume[address].plus(balance);
+        if (totalUserVolume[address.toLowerCase()]) {
+          totalUserVolume[address.toLowerCase()] = totalUserVolume[address.toLowerCase()].plus(balance);
         } else {
-          totalUserVolume[address] = balance;
+          totalUserVolume[address.toLowerCase()] = balance;
         }
       }
     );
