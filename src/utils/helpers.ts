@@ -608,10 +608,10 @@ export const getSnapShotBySnapShotUserVolumeAndReward = async (
     Object.entries<string>(snapHodlConfigBalance.totalStakedBalance).forEach(
       ([address, balance]) => {
         totalVolume = totalVolume + Number(balance);
-        if (totalUserVolume[address]) {
-          totalUserVolume[address] = totalUserVolume[address].plus(balance);
+        if (totalUserVolume[address.toLowerCase()]) {
+          totalUserVolume[address.toLowerCase()] = totalUserVolume[address.toLowerCase()].plus(balance);
         } else {
-          totalUserVolume[address] = balance;
+          totalUserVolume[address.toLowerCase()] = balance;
         }
       }
     );
@@ -619,10 +619,10 @@ export const getSnapShotBySnapShotUserVolumeAndReward = async (
     Object.entries(snapHodlConfigBalance.totalTradingVolume).forEach(
       ([address, balance]) => {
         totalVolume = totalVolume + Number(balance);
-        if (totalUserVolume[address]) {
-          totalUserVolume[address] = totalUserVolume[address].plus(balance);
+        if (totalUserVolume[address.toLowerCase()]) {
+          totalUserVolume[address.toLowerCase()] = totalUserVolume[address.toLowerCase()].plus(balance);
         } else {
-          totalUserVolume[address] = balance;
+          totalUserVolume[address.toLowerCase()] = balance;
         }
       }
     );
