@@ -609,10 +609,11 @@ export const getSnapShotBySnapShotUserVolumeAndReward = async (
       ([address, balance]) => {
         totalVolume = totalVolume + Number(balance);
         let refactoredAddress = address.toLowerCase();
+        let refactoredBalance  = Number(balance);
         if (totalUserVolume[refactoredAddress]) {
-          totalUserVolume[refactoredAddress] = totalUserVolume[refactoredAddress].plus(balance);
+          totalUserVolume[refactoredAddress] = totalUserVolume[refactoredAddress]+(refactoredBalance);
         } else {
-          totalUserVolume[refactoredAddress] = balance;
+          totalUserVolume[refactoredAddress] = refactoredBalance;
         }
       }
     );
@@ -621,10 +622,11 @@ export const getSnapShotBySnapShotUserVolumeAndReward = async (
       ([address, balance]) => {
         totalVolume = totalVolume + Number(balance);
         let refactoredAddress = address.toLowerCase();
+        let refactoredBalance  = Number(balance);
         if (totalUserVolume[refactoredAddress]) {
-          totalUserVolume[refactoredAddress] = totalUserVolume[refactoredAddress].plus(balance);
+          totalUserVolume[refactoredAddress] = totalUserVolume[refactoredAddress]+(refactoredBalance);
         } else {
-          totalUserVolume[refactoredAddress] = balance;
+          totalUserVolume[refactoredAddress] = refactoredBalance;
         }
       }
     );
